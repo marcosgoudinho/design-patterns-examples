@@ -1,28 +1,98 @@
-class Car {
-  constructor(brand, model, year, engine, color, gps) {
-    this.brand = brand;
-    this.model = model;
-    this.year = year;
-    this.engine = engine;
-    this.color = color;
-    this.gps = gps;
+class Document {
+  constructor(format, type, author, createdAt, signed) {
+    this.format = format; 
+    this.type = type;     
+    this.author = author;
+    this.createdAt = createdAt;
+    this.signed = signed;
   }
 
   showDetails() {
     console.log(
-      `${this.year} 
-      ${this.brand} 
-      ${this.model} 
-      - Motor: ${this.engine}, 
-      Cor: ${this.color}, 
-      GPS: ${this.gps ? "Sim" : "Não"}`
+      `${this.type.toUpperCase()} em ${this.format.toUpperCase()} - Autor: ${this.author}, Criado em: ${this.createdAt}, Assinado: ${this.signed ? "Sim" : "Não"}`
     );
   }
 }
 
-// Cliente precisa lembrar a ordem e todos os parâmetros
-const car1 = new Car("Toyota", "Corolla", 2024, "2.0", "Preto", true);
-const car2 = new Car("Honda", "Civic", 2023, "1.5 Turbo", "Prata", false);
+class DocumentBuilder {
+  constructor() {
+    this.catalog = {
+      pdf: ["report", "invoice"],
+      docx: ["report", "invoice"]
+    };
 
-car1.showDetails();
-car2.showDetails();
+    this.format = null;
+    this.type = null;
+    this.author = null;
+    this.createdAt = null;
+    this.signed = false;
+  }
+
+  setFormat(format) {
+    if (!this.catalog[format]) {
+      throw new Error(`Formato "${format}" não suportado.`);
+    }
+    this.format = format;
+
+    this.type = null;
+    return this;
+  }
+
+  setType(type) {
+    if (!this.format) {
+      throw new Error("Defina o formato antes do tipo.");
+    }
+    if (!this.catalog[this.format].includes(type)) {
+      throw new Error(`Tipo "${type}" não existe para o formato "${this.format}".`);
+    }
+    this.type = type;
+    return this;
+  }
+
+  setAuthor(author) {
+    this.author = author;
+    return this;
+  }
+
+  setCreatedAt(date) {
+    this.createdAt = date;
+    return this;
+  }
+
+  setSigned(signed) {
+    this.signed = signed;
+    return this;
+  }
+
+  build() {
+    if (!this.format || !this.type || !this.author || !this.createdAt) {
+      throw new Error("Preencha todos os campos obrigatórios.");
+    }
+    return new Document(this.format, this.type, this.author, this.createdAt, this.signed);
+  }
+}
+
+try {
+  const doc1 = new DocumentBuilder()
+    .setFormat("pdf")
+    .setType("report")
+    .setAuthor("Marcos")
+    .setCreatedAt("03/09/2025")
+    .setSigned(true)
+    .build();
+
+  doc1.showDetails();
+} catch (e) {
+  console.error(e.message);
+}
+
+try {
+  const invalidDoc = new DocumentBuilder()
+    .setFormat("docx")
+    .setType("invoice")
+    .setAuthor(null) 
+    .setCreatedAt("02/09/2025")
+    .build();
+} catch (e) {
+  console.error(e.message);
+}
